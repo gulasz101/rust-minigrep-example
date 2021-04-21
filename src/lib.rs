@@ -1,6 +1,6 @@
 use std::fs::read_to_string;
 use std::error::Error;
-use std::env::var;
+use std::env::{var, Args};
 
 pub struct Config {
     pub query: String,
@@ -9,13 +9,17 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new(args: &[String]) -> Result<Config, &str> {
-        if args.len() < 3 {
-            return Err("not enough args");
-        }
+    pub fn new(mut args: Args) -> Result<Config, &'static str> {
+        args.next();
 
-        let query = args[1].clone();
-        let filename = args[2].clone();
+        let query = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Missing query param")
+        };
+        let filename = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Missing filename param")
+        };
 
         let case_sensitive = var("CASE_INSENSITIVE").is_err();
 
